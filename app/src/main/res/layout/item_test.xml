@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintHorizontal_chainStyle="spread"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <Button
+        android:textSize="20sp"
+        android:id="@+id/btn_test_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="测试项名称"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/tv_test_result"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHorizontal_weight="3"
+    />
+
+    <TextView
+        android:textSize="20sp"
+        android:id="@+id/tv_test_result"
+        android:text="测试结果"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/btn_test_name"
+        app:layout_constraintRight_toRightOf="parent"
+        android:gravity="center"
+        app:layout_constraintHorizontal_weight="5"
+
+    />
+
+</android.support.constraint.ConstraintLayout>
