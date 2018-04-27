@@ -8,7 +8,7 @@ package rt.sg.racsystemtest.BlueTooth;
 public class BlueToothUtils {
 
 
-    
+
 
 
 
