@@ -7,7 +7,7 @@ package rt.sg.racsystemtest;
 public enum TestContent {
 
     ETHERNET("001","以太网"),
-    DEVICE_INFO("002","设别信息"),
+    DEVICE_INFO("002","设备信息"),
     MODEL("003","模块和SIM卡"),
     SERIAL("004","串口"),
     IP("005","IP"),
@@ -19,7 +19,8 @@ public enum TestContent {
     BUZZER("011", "蜂鸣器"),
     AUDIO("012", "音频输出"),
     WIFI("013", "WIFI"),
-    BLUETEETH("014", "蓝牙");
+    BLUETEETH("014", "蓝牙"),
+    MIC("015", "麦克风");
 
 
     private String code;

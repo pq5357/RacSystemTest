@@ -57,9 +57,9 @@ public class WifiAutoConnectManager {
             }
         }
 
-        delWifiItem("Robustel-308");
-        connectToSpecSsid(addWifiItem("Robustel-308", "Robustel123"));
-        return isConnected("Robustel-308", mContext);
+        delWifiItem("Robustel-30008");
+        connectToSpecSsid(addWifiItem("Robustel-30008", "Robustel123"));
+        return isConnected("Robustel-30008", mContext);
     }
 
 

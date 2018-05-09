@@ -42,6 +42,8 @@ public class TestManagerService extends Service {
     private ExecutorService scheduleThreadPool = Executors.newScheduledThreadPool(3);
     /*同步线程池*/
     private ExecutorService singleThreadPool = Executors.newSingleThreadExecutor();
+    //
+    private ExecutorService singleThreadPool1 = Executors.newSingleThreadExecutor();
     /*保存测试结果,最终返回该Sp的数据*/
     private SharedPreferences sp;
 
@@ -178,7 +180,7 @@ public class TestManagerService extends Service {
 
         try {
             sendSocket = new DatagramSocket();
-            InetAddress responseAddress = InetAddress.getByName("192.168.0.200");
+            InetAddress responseAddress = InetAddress.getByName("255.255.255.255");
             DatagramPacket sendPacket=new DatagramPacket(sendBuf,sendBuf.length,responseAddress, 9999);
             sendSocket.send(sendPacket);
         } catch (Exception e) {
@@ -222,6 +224,7 @@ public class TestManagerService extends Service {
         EventBus.getDefault().post(resultEvent);
         switch (request){
             case ETHERNET:
+                result = TestCore.getInstance(this).testEthernet();
                 break;
             case DEVICE_INFO:
                 result = TestCore.getInstance(this).getDeviceModel();
@@ -264,14 +267,24 @@ public class TestManagerService extends Service {
                 break;
             case WIFI:
                 result = TestCore.getInstance(this).testWifi();
+                break;
             case BLUETEETH:
                 result = TestCore.getInstance(this).testBlueTeeth();
+                break;
+            case MIC:
+                result = TestCore.getInstance(this).testMIC();
+                break;
         }
         resultEvent.setResult(result);
         Gson gson = new Gson();
         String json_results = gson.toJson(result);
         sp.edit().putString(request.getCode(),json_results).commit();
         returnResult(resultEvent);
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onTestRessultEvent(){
+
     }
 
 

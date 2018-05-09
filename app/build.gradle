@@ -70,4 +70,5 @@ dependencies {
     compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.30'
     //implementation files('libs/TQ_Util.jar')
     implementation files('libs/rt_gpio.jar')
+    compile 'cn.com.superLei:blelibrary:2.1.5'
 }

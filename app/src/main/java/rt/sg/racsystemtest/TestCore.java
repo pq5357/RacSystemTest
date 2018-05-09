@@ -1,5 +1,6 @@
 package rt.sg.racsystemtest;
 
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -7,13 +8,16 @@ import android.content.IntentFilter;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.MediaPlayer;
-import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Looper;
 import android.os.storage.StorageManager;
 import android.util.Log;
-import android.widget.VideoView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +27,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +38,7 @@ import java.util.concurrent.Executors;
 
 import gpio.Gpio;
 import gpio.Led;
+import rt.sg.racsystemtest.MediaRecord.MediaRecorderDemo;
 import rt.sg.racsystemtest.serial.SerialPortManager;
 import rt.sg.racsystemtest.serial.listener.OnSerialPortDataListener;
 import rt.sg.racsystemtest.wifi.WifiAutoConnectManager;
@@ -50,10 +56,14 @@ public class TestCore {
     public static final String HOME = "com.rac.broadcast.home";
     public static final String VOLUME_UP = "com.rac.broadcast.volume_up";
     public static final String VOLUME_DOWN = "com.rac.broadcast.volume_down";
+    public static final String ANDROID_BLUETOOTH_DEVICE_ACTION_FOUND = "android.bluetooth.device" +
+            ".action.FOUND";
     private static volatile TestCore instance = null;
 
     /*正常情况下除OTG端口外的USB接口数*/
     private static final int NORMAL_USB_COUNT = 3;
+
+    private volatile boolean isEthernetTestEnd = false;
 
     private Context mContext;
 
@@ -72,13 +82,37 @@ public class TestCore {
         return instance;
     }
 
+
+    /**
+     * 测试以太网
+     *
+     * @return
+     */
+    public String testEthernet() {
+
+        isEthernetTestEnd = false;
+
+        Intent intent = new Intent("rac.intent.action.CLOSE_DATA");
+
+        mContext.sendBroadcast(intent);
+
+        boolean isLinked = ping("www.baidu.com");
+
+        isEthernetTestEnd = true;
+
+        Intent intent1 = new Intent("rac.intent.action.OPEN_DATA");
+
+        mContext.sendBroadcast(intent1);
+
+        return isLinked ? "网口正常" : "网口异常";
+    }
+
     /**
      * 获取IP
      */
     public String getIp() {
 
         return TestUtils.getLocalIpAddress();
-
 
     }
 
@@ -181,6 +215,7 @@ public class TestCore {
         return extendedMemoryPath != null ? "SD卡正常" : "SD卡异常";
     }
 
+
     /**
      * 通过判断挂载路径能否移除确定外置SD卡是否存在
      *
@@ -197,13 +232,15 @@ public class TestCore {
             Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
             Method getPath = storageVolumeClazz.getMethod("getPath");
             Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
+            Method getDescription = storageVolumeClazz.getMethod("getDescription", Context.class);
             Object result = getVolumeList.invoke(mStorageManager);
             final int length = Array.getLength(result);
             for (int i = 0; i < length; i++) {
                 Object storageVolumeElement = Array.get(result, i);
                 String path = (String) getPath.invoke(storageVolumeElement);
                 boolean removable = (Boolean) isRemovable.invoke(storageVolumeElement);
-                if (removable) {
+                String descprition = (String) getDescription.invoke(storageVolumeElement, mContext);
+                if (removable && descprition.contains("SD")) {
                     return path;
                 }
             }
@@ -219,7 +256,6 @@ public class TestCore {
         return null;
     }
 
-
     /**
      * 测试4G模块和SIM卡
      *
@@ -232,9 +268,23 @@ public class TestCore {
 
         mEthernetManager.stop();*/
 
-        Intent intent = new Intent("rac.intent.action.CLOSE_ETHERNET");
+        if (isEthernetTestEnd == true) {
 
-        mContext.sendBroadcast(intent);
+            Intent intent = new Intent("rac.intent.action.CLOSE_ETHERNET");
+
+            mContext.sendBroadcast(intent);
+        } else {
+            try {
+                Thread.sleep(5000l);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            Intent intent = new Intent("rac.intent.action.CLOSE_ETHERNET");
+
+            mContext.sendBroadcast(intent);
+        }
+
 
         // 2. 等待4g模块连接
         try {
@@ -244,10 +294,10 @@ public class TestCore {
         }
 
         // 3. ping www.baidu.com
-        boolean isLinked = ping();
+        boolean isLinked = ping("www.baidu.com");
 
         // 4. 打开其他连接方式
-        Intent intent_open = new Intent("OPEN_ETHERNET");
+        Intent intent_open = new Intent("rac.intent.action.OPEN_ETHERNET");
 
         mContext.sendBroadcast(intent_open);
 
@@ -258,19 +308,21 @@ public class TestCore {
             e.printStackTrace();
         }
 
-        return isLinked ? "the model is ok" : "model has some errors";
+        return isLinked ? "模块和SIM卡正常" : "模块和SIM卡异常";
     }
 
 
     /**
      * 判断当前的网络连接状态是否能用
      * return ture  可用   flase不可用
+     *
+     * @param s
      */
-    public static final boolean ping() {
+    public static final boolean ping(String s) {
 
         String result = null;
         try {
-            String ip = "www.baidu.com";// ping 的地址，可以换成任何一种可靠的外网
+            String ip = s;// ping 的地址，可以换成任何一种可靠的外网
             Process p = Runtime.getRuntime().exec("ping -c 3 -w 100 " + ip);// ping网址3次
             // 读取ping的内容，可以不加
             InputStream input = p.getInputStream();
@@ -303,7 +355,8 @@ public class TestCore {
     /**
      * 待测试
      */
-    private static String[] serials = new String[]{"ttySAC1", "ttysWK0", "ttysWK1", "ttySAC4", "ttySAC2"};
+    private static String[] serials = new String[]{"ttySAC1", "ttysWK0", "ttysWK1", "ttySAC4",
+            "ttySAC2"};
 
     private volatile boolean isSerialTesting = false;
 
@@ -327,13 +380,12 @@ public class TestCore {
     }
 
 
-
     /**
      * 测试单一串口
      *
      * @return
      */
-    private  boolean testOneSerial(String device_name) {
+    private boolean testOneSerial(String device_name) {
         //1. 设置串口波特率
         int baudrate = 115200;
         final boolean[] isReceived = {false};
@@ -533,26 +585,152 @@ public class TestCore {
      */
     public String testWifi() {
 
-        WifiAutoConnectManager wifiAutoConnectManager = new WifiAutoConnectManager(mContext);
+/*        WifiAutoConnectManager wifiAutoConnectManager = new WifiAutoConnectManager(mContext);
 
         boolean enable = wifiAutoConnectManager.connect("Robustel-308", "Robustel123",
-                WifiAutoConnectManager.WifiCipherType.WIFICIPHER_WPA);
+                WifiAutoConnectManager.WifiCipherType.WIFICIPHER_WPA);*/
 
-        return enable ? "wifi成功" : "wifi失败";
+        WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+        if (!wifiManager.isWifiEnabled()) {
+            wifiManager.setWifiEnabled(true);
+        }
+        wifiManager.startScan();
+
+        try {
+            Thread.sleep(20000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        List<ScanResult> wifiList = wifiManager.getScanResults();
+
+        Log.i(TAG, wifiList.size() + "wifi列表");
+
+        return wifiList.size() > 0 ? "wifi正常" : "wifi异常";
 
     }
 
+
     /**
      * 测试蓝牙
+     *
      * @return
      */
     public String testBlueTeeth() {
 
+        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
+        if (!mBluetoothAdapter.isEnabled()) {
+            mBluetoothAdapter.enable();
+        }
 
-        return  "";
+        try {
+            Thread.sleep(10000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        mBluetoothAdapter.startDiscovery();
+
+        IntentFilter intentFilter = new IntentFilter();
+
+        intentFilter.addAction(ANDROID_BLUETOOTH_DEVICE_ACTION_FOUND);
+
+        DeviceReceiver receiver = new DeviceReceiver();
+
+        mContext.registerReceiver(receiver, intentFilter);
+
+        Thread time = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(40000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        time.start();
+        try {
+            time.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        mBluetoothAdapter.cancelDiscovery();
+
+        mBluetoothAdapter.disable();
+
+        mContext.unregisterReceiver(receiver);
+
+        return receiver.getResult() ? "蓝牙正常" : "蓝牙异常";
 
     }
+
+    private class DeviceReceiver extends BroadcastReceiver {
+
+        boolean isOk = false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(ANDROID_BLUETOOTH_DEVICE_ACTION_FOUND)) {
+                isOk = true;
+            }
+        }
+
+        public boolean getResult() {
+            return isOk;
+        }
+    }
+
+
+    boolean isHasMicInput = false;
+
+    /**
+     * 测试麦克风
+     *
+     * @return
+     */
+    public String testMIC() {
+
+
+        Thread thread = Thread.currentThread();
+
+        isHasMicInput = false;
+
+        EventBus.getDefault().register(this);
+
+        MediaRecorderDemo mediaRecorderDemo = new MediaRecorderDemo();
+
+        mediaRecorderDemo.startRecord();
+
+        try {
+            Thread.sleep(20000l);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        mediaRecorderDemo.stopRecord();
+
+        EventBus.getDefault().unregister(this);
+
+        return isHasMicInput ? "麦克风正常" : "麦克风异常";
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.BACKGROUND)
+    public void onReceivedMediaRecord(MediaEvent event) {
+
+        double db = event.getDb();
+
+        if (db > 0) {
+
+            isHasMicInput = true;
+
+        }
+    }
+
 
 }
 

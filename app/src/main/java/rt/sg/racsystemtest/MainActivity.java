@@ -8,7 +8,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<TestItem> testItems = new ArrayList<>();
     private TestAdapter testAdapter;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -64,6 +67,16 @@ public class MainActivity extends AppCompatActivity {
 
         activityTestBinding.rcyTest.setAdapter(testAdapter);
 
+        activityTestBinding.btnCheckAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                for(TestItem testItem : testItems){
+                    TestContent content = testItem.getTestContent();
+                    EventBus.getDefault().post(new TestRequestEvent(content));
+                }
+            }
+        });
+
         Intent intent = new Intent(this, TestManagerService.class);
 
         startService(intent);
@@ -86,8 +99,6 @@ public class MainActivity extends AppCompatActivity {
         testItems.add(new TestItem(TestContent.DEVICE_INFO));
         testItems.add(new TestItem(TestContent.MODEL));
         testItems.add(new TestItem(TestContent.SERIAL));
-        testItems.add(new TestItem(TestContent.IP));
-        testItems.add(new TestItem(TestContent.MAC));
         testItems.add(new TestItem(TestContent.USB));
         testItems.add(new TestItem(TestContent.BUTTON));
         testItems.add(new TestItem(TestContent.SDCARD));
@@ -96,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         testItems.add(new TestItem(TestContent.AUDIO));
         testItems.add(new TestItem(TestContent.WIFI));
         testItems.add(new TestItem(TestContent.BLUETEETH));
+        testItems.add(new TestItem(TestContent.MIC));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
@@ -117,4 +129,20 @@ public class MainActivity extends AppCompatActivity {
         testAdapter.notifyItemChanged(resultPosition);
 
     }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == event. KEYCODE_HOME) {
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onAttachedToWindow() {
+        this.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+        super.onAttachedToWindow();
+    }
+
 }
