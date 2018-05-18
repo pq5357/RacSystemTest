@@ -98,41 +98,8 @@ public class TestManagerService extends Service {
                 }
             }
         });
-
-        //initSerialsAsAssistant();
     }
-
-
-    private String[] serials = new String[]{"ttySAC1","ttysWK0","ttysWK2","ttysWK1", "ttySAC4",
-            "ttySAC2"};
-
-    /**
-     * 初始化所有串口设置串口监听，以应对作为辅助测试设备的情况
-     */
-    private void initSerialsAsAssistant() {
-        for(final String serial : serials){
-
-            final SerialPortManager mSerialPortManager = new SerialPortManager();
-
-            mSerialPortManager.openSerialPort(new File("/dev/" + serial),115200);
-
-            mSerialPortManager.setOnSerialPortDataListener(new OnSerialPortDataListener() {
-                @Override
-                public void onDataReceived(byte[] bytes) {
-                    String content = new String(bytes);
-                    Log.i("serial", "received" + content);
-                    if (content.equals("send success")) {
-                        mSerialPortManager.sendBytes(("received success").getBytes());
-                    }
-                }
-                @Override
-                public void onDataSent(byte[] bytes) {
-                    String content = new String(bytes);
-                    Log.i("serial", "send" + content);
-                }
-            });
-        }
-    }
+    
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
