@@ -47,12 +47,12 @@ android {
     }
     productFlavors {
     }
-    android.applicationVariants.all {
-        variant ->
-            variant.outputs.all {
-                output -> outputFileName = "RacSystemTest.apk"
-            }
+    android.applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "RacSystemTest_MAIN" +"_"+buildType.name+ new Date().format("yyyyMMddHHmm") +".apk"
+        }
     }
+
 
 
 }
