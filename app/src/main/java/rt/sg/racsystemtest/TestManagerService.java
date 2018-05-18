@@ -103,7 +103,8 @@ public class TestManagerService extends Service {
     }
 
 
-    private String[] serials = new String[]{"ttySAC1","ttysWK0","ttysWK1", "ttySAC4","ttySAC2"};
+    private String[] serials = new String[]{"ttySAC1","ttysWK0","ttysWK2","ttysWK1", "ttySAC4",
+            "ttySAC2"};
 
     /**
      * 初始化所有串口设置串口监听，以应对作为辅助测试设备的情况

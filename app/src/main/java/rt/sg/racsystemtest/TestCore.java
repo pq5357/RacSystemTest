@@ -355,8 +355,8 @@ public class TestCore {
     /**
      * 待测试
      */
-    private static String[] serials = new String[]{"ttySAC1", "ttysWK0", "ttysWK1", "ttySAC4",
-            "ttySAC2"};
+    private static String[] serials = new String[]{"ttySAC1", "ttysWK0","ttysWK2" ,"ttysWK1",
+            "ttySAC4", "ttySAC2"};
 
     private volatile boolean isSerialTesting = false;
 
