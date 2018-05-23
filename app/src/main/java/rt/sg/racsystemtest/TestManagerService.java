@@ -192,60 +192,59 @@ public class TestManagerService extends Service {
         EventBus.getDefault().post(resultEvent);
         switch (request){
             case ETHERNET:
-                result = TestCore.getInstance(this).testEthernet();
+                resultEvent = TestCore.getInstance(this).testEthernet(resultEvent);
                 break;
             case DEVICE_INFO:
-                result = TestCore.getInstance(this).getDeviceModel();
+                resultEvent = TestCore.getInstance(this).getDeviceModel(resultEvent);
                 break;
             case MODEL:
-                result = TestCore.getInstance(this).test4gModel();
+                resultEvent = TestCore.getInstance(this).test4gModel(resultEvent);
                 break;
             case SERIAL:
                 if((System.currentTimeMillis() - serialTesttime) > 40000){
                     serialTesttime = System.currentTimeMillis();
-                    result = TestCore.getInstance(this).testAllSerials();
+                    resultEvent = TestCore.getInstance(this).testAllSerials(resultEvent);
                 }else{
-                    result = "操作过于频繁";
+                    resultEvent.setResult("操作过于频繁");
                 }
                 break;
             case IP:
                 Shell.sendCmd("chmod 666 /sys/class/gpio/export");
-                result = TestCore.getInstance(this).getIp();
+                resultEvent = TestCore.getInstance(this).getIp(resultEvent);
                 break;
             case MAC:
-                result = TestCore.getInstance(this).getMacFromIp();
+                resultEvent = TestCore.getInstance(this).getMacFromIp(resultEvent);
                 break;
             case USB:
-                result = TestCore.getInstance(this).testAllUsbDevice();
+                resultEvent = TestCore.getInstance(this).testAllUsbDevice(resultEvent);
                 break;
             case BUTTON:
-                result = TestCore.getInstance(this).testButtons();
+                resultEvent = TestCore.getInstance(this).testButtons(resultEvent);
                 break;
             case SDCARD:
-                result = TestCore.getInstance(this).testSdCard();
+                resultEvent = TestCore.getInstance(this).testSdCard(resultEvent);
                 break;
             case DIDO:
-                result = TestCore.getInstance(this).testAllGpio();
+                resultEvent = TestCore.getInstance(this).testAllGpio(resultEvent);
                 break;
             case BUZZER:
-                result = TestCore.getInstance(this).testBuzzer();
+                resultEvent = TestCore.getInstance(this).testBuzzer(resultEvent);
                 break;
             case AUDIO:
-                result = TestCore.getInstance(this).testAudio();
+                resultEvent = TestCore.getInstance(this).testAudio(resultEvent);
                 break;
             case WIFI:
-                result = TestCore.getInstance(this).testWifi();
+                resultEvent = TestCore.getInstance(this).testWifi(resultEvent);
                 break;
             case BLUETEETH:
-                result = TestCore.getInstance(this).testBlueTeeth();
+                resultEvent = TestCore.getInstance(this).testBlueTeeth(resultEvent);
                 break;
             case MIC:
-                result = TestCore.getInstance(this).testMIC();
+                resultEvent = TestCore.getInstance(this).testMIC(resultEvent);
                 break;
         }
-        resultEvent.setResult(result);
         Gson gson = new Gson();
-        String json_results = gson.toJson(result);
+        String json_results = gson.toJson(resultEvent);
         sp.edit().putString(request.getCode(),json_results).commit();
         returnResult(resultEvent);
     }

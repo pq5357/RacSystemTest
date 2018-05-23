@@ -1,5 +1,6 @@
 package rt.sg.racsystemtest;
 
+import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.widget.TextView;
@@ -26,6 +27,16 @@ public class TestAdapter extends BaseQuickAdapter<TestItem, BaseViewHolder> {
         viewHolder.setText(R.id.btn_test_name, item.getTestContent().getName())
                 .setText(R.id.tv_test_result, item.getResult())
                 .addOnClickListener(R.id.btn_test_name);
-
+        if(item.getResult_code() != 0 ){
+            if(item.getResult_code() == 1){
+                viewHolder.setBackgroundColor(R.id.tv_test_result, Color.parseColor("#00ff00"));
+            }else if(item.getResult_code() == 2){
+                viewHolder.setBackgroundColor(R.id.tv_test_result, Color.parseColor("#ff0000"));
+            }else{
+                viewHolder.setBackgroundColor(R.id.tv_test_result, Color.TRANSPARENT);
+            }
+        }else{
+            viewHolder.setBackgroundColor(R.id.tv_test_result, Color.TRANSPARENT);
+        }
     }
 }

@@ -88,7 +88,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testEthernet() {
+    public TestResultEvent testEthernet(TestResultEvent resultEvent) {
 
         isEthernetTestEnd = false;
 
@@ -104,22 +104,33 @@ public class TestCore {
 
         mContext.sendBroadcast(intent1);
 
-        return isLinked ? "网口正常" : "网口异常";
+        if(isLinked){
+            resultEvent.setResult("网口正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else{
+            resultEvent.setResult("网口异常");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
+
+        return resultEvent;
     }
 
     /**
      * 获取IP
      */
-    public String getIp() {
+    public TestResultEvent getIp(TestResultEvent resultEvent) {
 
-        return TestUtils.getLocalIpAddress();
+        String localIpAddress = TestUtils.getLocalIpAddress();
+        resultEvent.setResult(localIpAddress);
+
+        return resultEvent;
 
     }
 
     /**
      * 打印全部的USB端口和设备信息
      */
-    public String testAllUsbDevice() {
+    public TestResultEvent testAllUsbDevice(TestResultEvent resultEvent) {
 
         int usb_count = 0;
 
@@ -137,13 +148,21 @@ public class TestCore {
             }
         }
 
-        return usb_count == NORMAL_USB_COUNT ? NORMAL_USB_COUNT + "个USB端口均正常" : "存在USB端口异常";
+        if(usb_count == NORMAL_USB_COUNT){
+            resultEvent.setResult(NORMAL_USB_COUNT + "个USB端口均正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else{
+            resultEvent.setResult(NORMAL_USB_COUNT + "存在USB端口异常");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
+
+        return resultEvent;
     }
 
     /**
      * 测试按键
      */
-    public String testButtons() {
+    public TestResultEvent testButtons(TestResultEvent resultEvent) {
 
         IntentFilter intentFilter = new IntentFilter();
 
@@ -174,7 +193,15 @@ public class TestCore {
         }
         mContext.unregisterReceiver(receiver);
 
-        return receiver.getResult() ? "按键均正常" : "按键存在问题";
+        if(receiver.getResult()){
+            resultEvent.setResult("按键均正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else{
+            resultEvent.setResult("按键存在问题");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
+
+        return resultEvent;
     }
 
 
@@ -208,11 +235,19 @@ public class TestCore {
     /**
      * 测试SD卡
      */
-    public String testSdCard() {
+    public TestResultEvent testSdCard(TestResultEvent resultEvent) {
 
         String extendedMemoryPath = getExtendedMemoryPath(mContext);
 
-        return extendedMemoryPath != null ? "SD卡正常" : "SD卡异常";
+        if(extendedMemoryPath != null ){
+            resultEvent.setResult("SD卡正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else{
+            resultEvent.setResult("SD卡异常");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
+
+        return resultEvent;
     }
 
 
@@ -261,7 +296,7 @@ public class TestCore {
      *
      * @return
      */
-    public String test4gModel() {
+    public TestResultEvent test4gModel(TestResultEvent resultEvent) {
         // 1. 断开其他连接方式
 /*        EthernetManager mEthernetManager =  (EthernetManager)mContext.getSystemService(Context
 .ETHERNET_SERVICE);
@@ -308,7 +343,16 @@ public class TestCore {
             e.printStackTrace();
         }
 
-        return isLinked ? "模块和SIM卡正常" : "模块和SIM卡异常";
+        if(isLinked){
+            resultEvent.setResult("模块和SIM卡正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else{
+            resultEvent.setResult("模块和SIM卡异常");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
+
+
+        return resultEvent;
     }
 
 
@@ -363,7 +407,7 @@ public class TestCore {
     /**
      * 测试全部串口
      */
-    public String testAllSerials() {
+    public TestResultEvent testAllSerials(TestResultEvent resultEvent) {
 
         Log.i("serial", "++++++++++++++开始测量");
 
@@ -372,11 +416,15 @@ public class TestCore {
             boolean flag = testOneSerial(serial);
 
             if (!flag) {
-                return (serial + "出错");
+                resultEvent.setResult(serial + "出错");
+                resultEvent.setResult_code(TestResultEvent.ERROR);
+                return resultEvent;
             }
         }
-        return "全部串口正常";
 
+        resultEvent.setResult("全部串口正常");
+        resultEvent.setResult_code(TestResultEvent.OK);
+        return resultEvent;
     }
 
 
@@ -430,8 +478,10 @@ public class TestCore {
     /**
      * 根据IP获取本地Mac
      */
-    public static String getMacFromIp() {
-        return TestUtils.getLocalMacAddressFromIp();
+    public static TestResultEvent getMacFromIp(TestResultEvent resultEvent) {
+        String localMacAddressFromIp = TestUtils.getLocalMacAddressFromIp();
+        resultEvent.setResult(localMacAddressFromIp);
+        return resultEvent;
     }
 
     /**
@@ -439,8 +489,9 @@ public class TestCore {
      *
      * @return
      */
-    public String getDeviceModel() {
-        return Build.MODEL;
+    public TestResultEvent getDeviceModel(TestResultEvent resultEvent ) {
+        resultEvent.setResult(Build.MODEL);
+        return resultEvent;
     }
 
     //同步线程池，处理gpio口的测试
@@ -455,7 +506,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testAllGpio() {
+    public TestResultEvent testAllGpio(TestResultEvent resultEvent) {
         isGpioRecycle = true;
         /*
         输入
@@ -492,7 +543,8 @@ public class TestCore {
             }
         }, 50000);
 
-        return "看看闪了没";
+        resultEvent.setResult("看看闪了没");
+        return resultEvent;
     }
 
     private void testOutGpio(final String id) {
@@ -540,7 +592,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testBuzzer() {
+    public TestResultEvent testBuzzer(TestResultEvent resultEvent) {
         String s = "听听响了没";
         Led.turnBeeper(true);
         try {
@@ -549,8 +601,8 @@ public class TestCore {
             e.printStackTrace();
         }
         Led.turnBeeper(false);
-
-        return s;
+        resultEvent.setResult(s);
+        return resultEvent;
     }
 
     /**
@@ -558,7 +610,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testAudio() {
+    public TestResultEvent testAudio(TestResultEvent resultEvent) {
         final MediaPlayer[] mMediaPlayer = {MediaPlayer.create(mContext, R.raw.testmusic)};
         mMediaPlayer[0].start();
         Timer timer = new Timer();
@@ -569,8 +621,8 @@ public class TestCore {
                 mMediaPlayer[0] = null;
             }
         }, 60000);
-
-        return "听听耳机和功放输出";
+        resultEvent.setResult("播放测试音乐");
+        return resultEvent;
     }
 
 
@@ -583,7 +635,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testWifi() {
+    public TestResultEvent testWifi(TestResultEvent resultEvent) {
 
 /*        WifiAutoConnectManager wifiAutoConnectManager = new WifiAutoConnectManager(mContext);
 
@@ -606,8 +658,15 @@ public class TestCore {
 
         Log.i(TAG, wifiList.size() + "wifi列表");
 
-        return wifiList.size() > 0 ? "wifi正常" : "wifi异常";
+        if(wifiList.size() > 0){
+            resultEvent.setResult("wifi正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else{
+            resultEvent.setResult("wifi异常");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
 
+        return resultEvent;
     }
 
 
@@ -616,7 +675,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testBlueTeeth() {
+    public TestResultEvent testBlueTeeth(TestResultEvent resultEvent) {
 
         BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -663,8 +722,15 @@ public class TestCore {
 
         mContext.unregisterReceiver(receiver);
 
-        return receiver.getResult() ? "蓝牙正常" : "蓝牙异常";
+        if(receiver.getResult()){
+            resultEvent.setResult_code(TestResultEvent.OK);
+            resultEvent.setResult("蓝牙正常");
+        }else{
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+            resultEvent.setResult("蓝牙异常");
+        }
 
+        return resultEvent;
     }
 
     private class DeviceReceiver extends BroadcastReceiver {
@@ -692,7 +758,7 @@ public class TestCore {
      *
      * @return
      */
-    public String testMIC() {
+    public TestResultEvent testMIC(TestResultEvent resultEvent) {
 
 
         Thread thread = Thread.currentThread();
@@ -715,8 +781,15 @@ public class TestCore {
 
         EventBus.getDefault().unregister(this);
 
-        return isHasMicInput ? "麦克风正常" : "麦克风异常";
+        if(isHasMicInput){
+            resultEvent.setResult("麦克风正常");
+            resultEvent.setResult_code(TestResultEvent.OK);
+        }else {
+            resultEvent.setResult("麦克风异常");
+            resultEvent.setResult_code(TestResultEvent.ERROR);
+        }
 
+        return resultEvent;
     }
 
     @Subscribe(threadMode = ThreadMode.BACKGROUND)

@@ -10,6 +10,12 @@ public class TestResultEvent {
 
     private String result;
 
+    public static final int OK = 1;
+    public static final int ERROR = 2;
+    public static final int DEFALUT = 3;
+
+    private int result_code;
+
     public TestResultEvent() {
     }
 
@@ -36,5 +42,13 @@ public class TestResultEvent {
 
     public void setTestContent(TestContent testContent) {
         this.testContent = testContent;
+    }
+
+    public int getResult_code() {
+        return result_code;
+    }
+
+    public void setResult_code(int result_code) {
+        this.result_code = result_code;
     }
 }

@@ -31,7 +31,6 @@
         app:layout_constraintRight_toRightOf="parent"
         android:gravity="center"
         app:layout_constraintHorizontal_weight="5"
-
     />
 
 </android.support.constraint.ConstraintLayout>

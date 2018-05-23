@@ -139,6 +139,8 @@ public class MainActivity extends AppCompatActivity {
 
         TestContent testContent = event.getTestContent();
 
+        int result_code = event.getResult_code();
+
         int resultPosition = -1;
         for(int i=0;i < testItems.size();i++){
             if(testItems.get(i).getTestContent() == testContent){
@@ -147,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         testItems.get(resultPosition).setResult(result);
+
+        testItems.get(resultPosition).setResult_code(result_code);
 
         testAdapter.notifyItemChanged(resultPosition);
 
