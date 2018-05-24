@@ -152,7 +152,7 @@ public class TestCore {
             resultEvent.setResult(NORMAL_USB_COUNT + "个USB端口均正常");
             resultEvent.setResult_code(TestResultEvent.OK);
         }else{
-            resultEvent.setResult(NORMAL_USB_COUNT + "存在USB端口异常");
+            resultEvent.setResult("存在USB端口异常");
             resultEvent.setResult_code(TestResultEvent.ERROR);
         }
 
