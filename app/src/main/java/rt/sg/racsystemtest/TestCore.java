@@ -143,7 +143,8 @@ public class TestCore {
         while (iterator.hasNext()) {
             UsbDevice device = iterator.next();
             Log.i("usb", device.toString());
-            if (!device.getProductName().equals("Android")) {
+            if (!device.getProductName().equals("Android") && !device.getProductName().contains
+                    ("HUAWEI")) {
                 usb_count++;
             }
         }
