@@ -80,6 +80,13 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        activityTestBinding.btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
         Intent intent = new Intent(this, TestManagerService.class);
 
         startService(intent);
