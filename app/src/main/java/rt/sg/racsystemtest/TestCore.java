@@ -11,7 +11,6 @@ import android.media.MediaPlayer;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.os.Looper;
 import android.os.storage.StorageManager;
 import android.util.Log;
 
@@ -27,7 +26,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -39,9 +37,9 @@ import java.util.concurrent.Executors;
 import gpio.Gpio;
 import gpio.Led;
 import rt.sg.racsystemtest.MediaRecord.MediaRecorderDemo;
+import rt.sg.racsystemtest.config.Config;
 import rt.sg.racsystemtest.serial.SerialPortManager;
 import rt.sg.racsystemtest.serial.listener.OnSerialPortDataListener;
-import rt.sg.racsystemtest.wifi.WifiAutoConnectManager;
 
 /**
  * 测试核心类
@@ -61,7 +59,7 @@ public class TestCore {
     private static volatile TestCore instance = null;
 
     /*正常情况下除OTG端口外的USB接口数*/
-    private static final int NORMAL_USB_COUNT = 3;
+    private int usb_count;
 
     private volatile boolean isEthernetTestEnd = false;
 
@@ -69,6 +67,7 @@ public class TestCore {
 
     private TestCore(Context context) {
         mContext = context;
+        initTestParam();
     }
 
     public static TestCore getInstance(Context context) {
@@ -82,6 +81,18 @@ public class TestCore {
         return instance;
     }
 
+    private void initTestParam(){
+
+        String model = Build.MODEL;
+
+        if(model.equals("RAC7010")){
+            usb_count = Config.Rac7010.USB_COUNT;
+            serials = Config.Rac7010.SERIALS;
+        } else{
+
+
+        }
+    }
 
     /**
      * 测试以太网
@@ -149,8 +160,8 @@ public class TestCore {
             }
         }
 
-        if(usb_count == NORMAL_USB_COUNT){
-            resultEvent.setResult(NORMAL_USB_COUNT + "个USB端口均正常");
+        if(usb_count == this.usb_count){
+            resultEvent.setResult(this.usb_count + "个USB端口均正常");
             resultEvent.setResult_code(TestResultEvent.OK);
         }else{
             resultEvent.setResult("存在USB端口异常");
@@ -299,9 +310,7 @@ public class TestCore {
      */
     public TestResultEvent test4gModel(TestResultEvent resultEvent) {
         // 1. 断开其他连接方式
-/*        EthernetManager mEthernetManager =  (EthernetManager)mContext.getSystemService(Context
-.ETHERNET_SERVICE);
-
+/*        EthernetManager mEthernetManager =  (EthernetManager)mContext.getSystemService(Context.ETHERNET_SERVICE);
         mEthernetManager.stop();*/
 
         if (isEthernetTestEnd == true) {
@@ -400,7 +409,7 @@ public class TestCore {
     /**
      * 待测试
      */
-    private static String[] serials = new String[]{"ttySAC1", "ttysWK0","ttysWK2" ,"ttysWK1",
+    private String[] serials = new String[]{"ttySAC1", "ttysWK0","ttysWK2" ,"ttysWK1",
             "ttySAC4", "ttySAC2"};
 
     private volatile boolean isSerialTesting = false;
