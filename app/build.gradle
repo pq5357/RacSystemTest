@@ -9,7 +9,7 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
-        multiDexEnabled true
+        //multiDexEnabled true
 
         // 使用Cmake工具
         externalNativeBuild {
@@ -34,9 +34,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    dexOptions {
+/*    dexOptions {
         preDexLibraries false
-    }
+    }*/
     buildToolsVersion '27.0.2'
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_7

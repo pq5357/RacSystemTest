@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -38,6 +39,8 @@ import gpio.Gpio;
 import gpio.Led;
 import rt.sg.racsystemtest.MediaRecord.MediaRecorderDemo;
 import rt.sg.racsystemtest.config.Config;
+import rt.sg.racsystemtest.config.ConfigReader;
+import rt.sg.racsystemtest.config.DeviceConfig;
 import rt.sg.racsystemtest.serial.SerialPortManager;
 import rt.sg.racsystemtest.serial.listener.OnSerialPortDataListener;
 
@@ -54,12 +57,16 @@ public class TestCore {
     public static final String HOME = "com.rac.broadcast.home";
     public static final String VOLUME_UP = "com.rac.broadcast.volume_up";
     public static final String VOLUME_DOWN = "com.rac.broadcast.volume_down";
+    public static final String BACK = "com.rac.broadcast.back";
+
+    public List<String> button_actions = new ArrayList<>();
+
     public static final String ANDROID_BLUETOOTH_DEVICE_ACTION_FOUND = "android.bluetooth.device" +
             ".action.FOUND";
+
     private static volatile TestCore instance = null;
 
-    /*正常情况下除OTG端口外的USB接口数*/
-    private int usb_count;
+    private DeviceConfig testConfig;
 
     private volatile boolean isEthernetTestEnd = false;
 
@@ -83,15 +90,12 @@ public class TestCore {
 
     private void initTestParam(){
 
-        String model = Build.MODEL;
+        testConfig = ConfigReader.getConfigFromFile();
 
-        if(model.equals("RAC7010")){
-            usb_count = Config.Rac7010.USB_COUNT;
-            serials = Config.Rac7010.SERIALS;
-        } else{
-
-
+        if(testConfig == null){
+            throw new IllegalStateException("can`t find test_config.json in \\system\\etc");
         }
+
     }
 
     /**
@@ -160,8 +164,8 @@ public class TestCore {
             }
         }
 
-        if(usb_count == this.usb_count){
-            resultEvent.setResult(this.usb_count + "个USB端口均正常");
+        if(usb_count == testConfig.getUsbCount()){
+            resultEvent.setResult(testConfig.getUsbCount() + "个USB端口均正常");
             resultEvent.setResult_code(TestResultEvent.OK);
         }else{
             resultEvent.setResult("存在USB端口异常");
@@ -178,9 +182,15 @@ public class TestCore {
 
         IntentFilter intentFilter = new IntentFilter();
 
-        intentFilter.addAction(HOME);
-        intentFilter.addAction(VOLUME_UP);
-        intentFilter.addAction(VOLUME_DOWN);
+        button_actions.clear();
+
+        button_actions.addAll(testConfig.getButtonActions());
+
+        for(String action : button_actions){
+
+            intentFilter.addAction(action);
+
+        }
 
         ButtonReceiver receiver = new ButtonReceiver();
 
@@ -222,6 +232,7 @@ public class TestCore {
         boolean home_ok = false;
         boolean volume_up_ok = false;
         boolean volume_down_ok = false;
+        boolean back_ok = false;
 
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -233,12 +244,26 @@ public class TestCore {
                 volume_up_ok = true;
             } else if (action.equals(VOLUME_DOWN)) {
                 volume_down_ok = true;
+            } else if (action.equals(BACK)){
+                back_ok = true;
             }
         }
 
         public boolean getResult() {
-
-            return home_ok && volume_up_ok && volume_down_ok;
+            for(String action : button_actions){
+                if (action.equals(HOME) && home_ok) {
+                    continue;
+                } else if (action.equals(VOLUME_UP) && volume_up_ok) {
+                    continue;
+                } else if (action.equals(VOLUME_DOWN) && volume_down_ok) {
+                    continue;
+                } else if (action.equals(BACK) && back_ok){
+                    continue;
+                } else{
+                    return false;
+                }
+            }
+            return true;
         }
 
     }
@@ -406,22 +431,13 @@ public class TestCore {
 
     }
 
-    /**
-     * 待测试
-     */
-    private String[] serials = new String[]{"ttySAC1", "ttysWK0","ttysWK2" ,"ttysWK1",
-            "ttySAC4", "ttySAC2"};
-
-    private volatile boolean isSerialTesting = false;
 
     /**
      * 测试全部串口
      */
     public TestResultEvent testAllSerials(TestResultEvent resultEvent) {
 
-        Log.i("serial", "++++++++++++++开始测量");
-
-        for (String serial : serials) {
+        for (String serial : testConfig.getSerials()) {
 
             boolean flag = testOneSerial(serial);
 

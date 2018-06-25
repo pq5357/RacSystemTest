@@ -1,5 +1,4 @@
 package rt.sg.racsystemtest;
-
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -16,6 +15,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -24,13 +24,17 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
+import rt.sg.racsystemtest.config.ConfigReader;
 import rt.sg.racsystemtest.databinding.ActivityTestBinding;
+import rt.sg.racsystemtest.config.DeviceConfig;
+
 
 /**
  * Created by sg on 2018/3/12.
  */
 
 public class MainActivity extends AppCompatActivity {
+
 
     private static final String TAG = "TestActivity";
 
@@ -39,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityTestBinding activityTestBinding;
 
     private List<TestItem> testItems = new ArrayList<>();
-    private TestAdapter testAdapter;
 
+    private TestAdapter testAdapter;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -52,7 +56,28 @@ public class MainActivity extends AppCompatActivity {
 
         activityTestBinding = DataBindingUtil.setContentView(this , R.layout.activity_test);
 
+        DeviceConfig config = new DeviceConfig();
+
+        config.setUsbCount(3);
+        config.setSerials(new String[]{"ttySAC1", "ttysWK0","ttysWK2","ttysWK1", "ttySAC4",
+                "ttySAC2"});
+
+        List<String> list = new ArrayList<>();
+
+        list.add("com.rac.broadcast.home");
+        list.add("com.rac.broadcast.home");
+        list.add("com.rac.broadcast.home");
+        list.add("com.rac.broadcast.home");
+        config.setButtonActions(list);
+
+        String json = new Gson().toJson(config);
+
+        System.out.println(json);
+
+
         EventBus.getDefault().register(this);
+
+        ConfigReader.getConfigFromFile();
 
         initTestItems();
 

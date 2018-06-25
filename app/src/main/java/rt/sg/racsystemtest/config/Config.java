@@ -17,8 +17,9 @@ public class Config {
 
     public static class Rac7000{
 
-
-
+        public static final int USB_COUNT = 3;
+        public static final String[] SERIALS = new String[]{"ttymxc0", "ttymxc1","ttymxc2" ,
+                "ttymxc3", "ttymxc4", "ttymxc5"};
 
     }
 

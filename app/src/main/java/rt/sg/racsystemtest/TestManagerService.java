@@ -8,7 +8,6 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.tq.Shell;
 import android.util.Log;
-import android.util.Slog;
 
 import com.google.gson.Gson;
 
@@ -98,6 +97,10 @@ public class TestManagerService extends Service {
                 }
             }
         });
+
+        
+
+
     }
 
 
@@ -112,7 +115,6 @@ public class TestManagerService extends Service {
      * */
     private void processCommand(String request) {
 
-        Slog.v("UDP", "接受到的数据包信息：" + request);
 
         switch (request) {
             case "r-connect":
