@@ -38,9 +38,9 @@ import java.util.concurrent.Executors;
 import gpio.Gpio;
 import gpio.Led;
 import rt.sg.racsystemtest.MediaRecord.MediaRecorderDemo;
-import rt.sg.racsystemtest.config.Config;
 import rt.sg.racsystemtest.config.ConfigReader;
 import rt.sg.racsystemtest.config.DeviceConfig;
+import rt.sg.racsystemtest.config.Model;
 import rt.sg.racsystemtest.serial.SerialPortManager;
 import rt.sg.racsystemtest.serial.listener.OnSerialPortDataListener;
 
@@ -59,7 +59,6 @@ public class TestCore {
     public static final String VOLUME_DOWN = "com.rac.broadcast.volume_down";
     public static final String BACK = "com.rac.broadcast.back";
 
-    public List<String> button_actions = new ArrayList<>();
 
     public static final String ANDROID_BLUETOOTH_DEVICE_ACTION_FOUND = "android.bluetooth.device" +
             ".action.FOUND";
@@ -96,6 +95,10 @@ public class TestCore {
             throw new IllegalStateException("can`t find test_config.json in \\system\\etc");
         }
 
+    }
+
+    public DeviceConfig getTestConfig() {
+        return testConfig;
     }
 
     /**
@@ -158,8 +161,9 @@ public class TestCore {
         while (iterator.hasNext()) {
             UsbDevice device = iterator.next();
             Log.i("usb", device.toString());
-            if (!device.getProductName().equals("Android") && !device.getProductName().contains
-                    ("HUAWEI")) {
+
+            Model model = new Model("",device.getProductId(),device.getVendorId());
+            if (!testConfig.getModels().contains(model)){
                 usb_count++;
             }
         }
@@ -182,7 +186,7 @@ public class TestCore {
 
         IntentFilter intentFilter = new IntentFilter();
 
-        button_actions.clear();
+        List<String> button_actions = new ArrayList<>();
 
         button_actions.addAll(testConfig.getButtonActions());
 
@@ -250,7 +254,7 @@ public class TestCore {
         }
 
         public boolean getResult() {
-            for(String action : button_actions){
+            for(String action : testConfig.getButtonActions()){
                 if (action.equals(HOME) && home_ok) {
                     continue;
                 } else if (action.equals(VOLUME_UP) && volume_up_ok) {
@@ -525,7 +529,6 @@ public class TestCore {
 
     private ExecutorService testThreadPool = Executors.newScheduledThreadPool(3);
 
-    private String[] ids = new String[]{"3", "4", "164", "165", "146", "147", "148", "149"};
 
     /**
      * 测试全部GPIO接口,存在输入和输出两种情况
@@ -554,7 +557,8 @@ public class TestCore {
 
         echo 1 > /sys/class/gpio/gpio148/value
         */
-        for (final String id : ids) {
+
+        for (final String id : testConfig.getGpioIds()) {
             testThreadPool.execute(new Runnable() {
                 @Override
                 public void run() {

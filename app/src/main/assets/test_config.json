@@ -1,0 +1,8 @@
+{
+  "isAssistant":false,
+  "usbCount":3,
+  "serials": ["ttySAC1","ttysWK0","ttysWK2","ttysWK1","ttySAC4","ttySAC2"],
+  "buttonActions": ["com.rac.broadcast.home", "com.rac.broadcast.volume_up","com.rac.broadcast.volume_down","com.rac.broadcast.back"] ,
+  "models":[{"name":"ME3630","pid":"5238","vid":"6610"},{"name":"ME909s-120","pid":"5569", "vid":"4817"}] ,
+  "gpioIds":["3", "4", "164", "165", "146", "147", "148", "149"]
+}

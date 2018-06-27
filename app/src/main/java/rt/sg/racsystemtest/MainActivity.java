@@ -16,15 +16,18 @@ import android.view.WindowManager;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.google.gson.Gson;
+import com.robustel.misc.NativeCTL;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import rt.sg.racsystemtest.config.ConfigReader;
+import rt.sg.racsystemtest.config.Model;
 import rt.sg.racsystemtest.databinding.ActivityTestBinding;
 import rt.sg.racsystemtest.config.DeviceConfig;
 
@@ -56,11 +59,13 @@ public class MainActivity extends AppCompatActivity {
 
         activityTestBinding = DataBindingUtil.setContentView(this , R.layout.activity_test);
 
-        DeviceConfig config = new DeviceConfig();
+/*        DeviceConfig config = new DeviceConfig();
 
         config.setUsbCount(3);
-        config.setSerials(new String[]{"ttySAC1", "ttysWK0","ttysWK2","ttysWK1", "ttySAC4",
-                "ttySAC2"});
+
+        List<String> serList = Arrays.asList(new String[]{"ttySAC1", "ttysWK0","ttysWK2","ttysWK1", "ttySAC4", "ttySAC2"});
+
+        config.setSerials(serList);
 
         List<String> list = new ArrayList<>();
 
@@ -70,9 +75,18 @@ public class MainActivity extends AppCompatActivity {
         list.add("com.rac.broadcast.home");
         config.setButtonActions(list);
 
+        List<Model> models = new ArrayList<>();
+        Model model = new Model("ME3630","5238", "6610");
+        Model model1 = new Model("ME120","1111", "2222");
+
+        models.add(model);
+        models.add(model1);
+
+        config.setModels(models);
+
         String json = new Gson().toJson(config);
 
-        System.out.println(json);
+        System.out.println(json);*/
 
 
         EventBus.getDefault().register(this);
@@ -108,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
         activityTestBinding.btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                System.exit(0);
                 finish();
             }
         });
@@ -128,11 +143,12 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
             case R.id.action_zte:
-                Shell.sendCmd("cp -f /system/lib/libzte-ril.so /system/lib/libreference-ril.so");
+                //Shell.sendCmd("cp -f /system/lib/libzte-ril.so /system/lib/libreference-ril.so");
+                NativeCTL.sendShellCMD("cp -f /system/lib/libzte-ril.so /system/lib/libreference-ril.so");
                 break;
             case R.id.action_huawei:
-                Shell.sendCmd("cp -f /system/lib/libhuawei-ril.so /system/lib/libreference-ril" +
-                        ".so");
+                //Shell.sendCmd("cp -f /system/lib/libhuawei-ril.so /system/lib/libreference-ril.so");
+                NativeCTL.sendShellCMD("cp -f /system/lib/libhuawei-ril.so /system/lib/libreference-ril.so");
                 break;
         }
         return super.onOptionsItemSelected(item);

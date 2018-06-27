@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.tq.Shell;
@@ -20,9 +21,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import rt.sg.racsystemtest.config.DeviceConfig;
 import rt.sg.racsystemtest.serial.SerialPortManager;
 import rt.sg.racsystemtest.serial.listener.OnSerialPortDataListener;
 
@@ -98,9 +101,46 @@ public class TestManagerService extends Service {
             }
         });
 
-        
 
+        DeviceConfig testConfig = TestCore.getInstance(mContext).getTestConfig();
 
+        if(testConfig.isAssistant()){
+            initSerialsAsAssistant(testConfig);
+        }
+    }
+
+    /**
+     * 初始化所有串口设置串口监听，以应对作为辅助测试设备的情况
+     * @param testConfig
+     */
+    private void initSerialsAsAssistant(DeviceConfig testConfig) {
+
+        List<String> serials = testConfig.getSerials();
+
+        sp.edit().putString("Version", "辅助测试").apply();
+
+        for(final String serial : serials){
+
+            final SerialPortManager mSerialPortManager = new SerialPortManager();
+
+            mSerialPortManager.openSerialPort(new File("/dev/" + serial),115200);
+
+            mSerialPortManager.setOnSerialPortDataListener(new OnSerialPortDataListener() {
+                @Override
+                public void onDataReceived(byte[] bytes) {
+                    String content = new String(bytes);
+                    Log.i("serial", "received" + content);
+                    if (content.equals("send success")) {
+                        mSerialPortManager.sendBytes(("received success").getBytes());
+                    }
+                }
+                @Override
+                public void onDataSent(byte[] bytes) {
+                    String content = new String(bytes);
+                    Log.i("serial", "send" + content);
+                }
+            });
+        }
     }
 
 
@@ -114,7 +154,6 @@ public class TestManagerService extends Service {
      * 处理接收到的UDP信息
      * */
     private void processCommand(String request) {
-
 
         switch (request) {
             case "r-connect":

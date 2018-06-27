@@ -12,22 +12,32 @@ public class DeviceConfig {
     /**
      * 当前设备是否为辅助测试设备
      */
-    public boolean isAssistant;
+    private boolean isAssistant;
 
     /**
      * 当前测试设备的串口名称集合
      */
-    public List<String> serials;
+    private List<String> serials;
 
     /**
      * 待测量的usb数量
      */
-    public int usbCount;
+    private int usbCount;
 
     /**
      * 待验证的按键广播事件
      */
-    public List<String> buttonActions;
+    private List<String> buttonActions;
+
+    /**
+     *可能使用到的model型号
+     */
+    private List<Model> models;
+
+    /**
+     * 待测试gpio端口
+     */
+    private List<String> gpioIds;
 
     public boolean isAssistant() {
         return isAssistant;
@@ -61,6 +71,23 @@ public class DeviceConfig {
         this.buttonActions = buttonActions;
     }
 
+
+    public List<Model> getModels() {
+        return models;
+    }
+
+    public void setModels(List<Model> models) {
+        this.models = models;
+    }
+
+    public List<String> getGpioIds() {
+        return gpioIds;
+    }
+
+    public void setGpioIds(List<String> gpioIds) {
+        this.gpioIds = gpioIds;
+    }
+
     @Override
     public String toString() {
         return "DeviceConfig{" +
@@ -68,6 +95,8 @@ public class DeviceConfig {
                 ", serials=" + serials +
                 ", usbCount=" + usbCount +
                 ", buttonActions=" + buttonActions +
+                ", models=" + models +
+                ", gpioIds=" + gpioIds +
                 '}';
     }
 }

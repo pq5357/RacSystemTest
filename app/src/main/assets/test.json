@@ -1,6 +1,0 @@
-{
-  "isAssistant":false,
-  "usbCount":3,
-  "serials": ["ttySAC1", "ttysWK0","ttysWK2","ttysWK1", "ttySAC4","ttySAC2"],
-  "buttonActions": ["com.rac.broadcast.home", "com.rac.broadcast.volume_up","com.rac.broadcast.volume_down","com.rac.broadcast.back"]
-}

@@ -26,7 +26,7 @@ public class Gpio {
     /**
      * 修改/sys/class/gpio/unexport的读写权限
      */
-    private  static void changeUnExportPermission() {
+    private static void changeUnExportPermission() {
         if (!FileHelper.isFileCanWrite(Constance.unexportPath)) {
             Shell.sendCmd("chmod 666 " + Constance.unexportPath);
         }
@@ -89,6 +89,7 @@ public class Gpio {
 
     /**
      * 配置gpio端口的输入输出方向
+     *
      * @param context
      * @param base
      * @param digit
@@ -96,7 +97,7 @@ public class Gpio {
      */
 
     public static void configGpioDirection(Context context, String base, String digit, String
-            configMode){
+            configMode) {
         String realID = getRealID(base, digit);
         configGpioDirection(context, realID, configMode);
     }
@@ -130,19 +131,21 @@ public class Gpio {
     public static void setOutGpio(String id, String vaule) {
         String gpio_dir = (new StringBuilder()).append(Constance.parentGpioPath).append("gpio")
                 .append(id).append("/direction").toString();
-        if (FileHelper.read(gpio_dir).equals("out\n")) {
-            try {
+        try {
+            if (FileHelper.read(gpio_dir).equals("out\n")) {
+
                 FileHelper.save((new StringBuilder()).append(Constance.parentGpioPath).append
                         ("gpio").append(id).append("/value").toString(), vaule);
                 return;
-            } catch (Exception e) {
-                e.printStackTrace();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
     /**
      * 设置输出gpio的值
+     *
      * @param base  寄存器基数
      * @param digit 寄存器位数
      * @param value

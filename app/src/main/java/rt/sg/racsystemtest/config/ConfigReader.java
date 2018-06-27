@@ -1,9 +1,8 @@
 package rt.sg.racsystemtest.config;
 
-import android.util.Log;
-
 import com.google.gson.Gson;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -20,11 +19,17 @@ public class ConfigReader {
     public static DeviceConfig getConfigFromFile(){
 
         try {
-
-            InputStream is = new FileInputStream("/system/etc/test_config.json");
-            if(is == null){
-                return;
+            File config = new File("/system/etc/test_config.json");
+            File config_test = new File("/data/test_config.json");
+            InputStream is;
+            if(config_test.exists()){
+                is = new FileInputStream("/data/test_config.json");
+            }else if(config.exists()){
+                is = new FileInputStream("/system/etc/test_config.json");
+            } else{
+                return null;
             }
+
             InputStreamReader isr = new InputStreamReader(is, "UTF-8");
             BufferedReader br = new BufferedReader(isr);
             String line;
@@ -45,11 +50,8 @@ public class ConfigReader {
                 return null;
             }
         } catch (Exception e){
-
-
+            return null;
         }
-
-
     }
 
 
