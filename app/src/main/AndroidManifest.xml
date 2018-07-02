@@ -27,7 +27,6 @@
         android:theme="@style/AppTheme">
         <service android:name=".TestManagerService"/>
         <service android:name=".GpioService"/>
-        <service android:name=".LedService" />
         <activity
             android:name=".MainActivity">
             <intent-filter>
