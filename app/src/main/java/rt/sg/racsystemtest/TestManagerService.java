@@ -129,7 +129,7 @@ public class TestManagerService extends Service {
                 @Override
                 public void onDataReceived(byte[] bytes) {
                     String content = new String(bytes);
-                    Log.i("serial", "received" + content);
+                    Log.i("serial", "辅助 : received" + content);
                     if (content.equals("send success")) {
                         mSerialPortManager.sendBytes(("received success").getBytes());
                     }
@@ -242,7 +242,7 @@ public class TestManagerService extends Service {
                 resultEvent = TestCore.getInstance(this).test4gModel(resultEvent);
                 break;
             case SERIAL:
-                if((System.currentTimeMillis() - serialTesttime) > 40000){
+                if((System.currentTimeMillis() - serialTesttime) > 30000){
                     serialTesttime = System.currentTimeMillis();
                     resultEvent = TestCore.getInstance(this).testAllSerials(resultEvent);
                 }else{

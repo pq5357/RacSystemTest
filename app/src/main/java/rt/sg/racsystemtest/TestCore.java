@@ -70,6 +70,7 @@ public class TestCore {
     private volatile boolean isEthernetTestEnd = false;
 
     private Context mContext;
+    private SerialPortManager mSerialPortManager = new SerialPortManager();
 
     private TestCore(Context context) {
         mContext = context;
@@ -92,7 +93,8 @@ public class TestCore {
         testConfig = ConfigReader.getConfigFromFile();
 
         if(testConfig == null){
-            throw new IllegalStateException("can`t find test_config.json in \\system\\etc");
+            throw new IllegalStateException("can`t find test_config.json in /system/etc or /data " +
+                    "; or please check file permission");
         }
 
     }
@@ -468,7 +470,11 @@ public class TestCore {
         int baudrate = 115200;
         final boolean[] isReceived = {false};
         //2. 注册串口监听
-        final SerialPortManager mSerialPortManager = new SerialPortManager();
+        Log.i(TAG,"SerialPortReadThread : " + mSerialPortManager);
+
+        if(mSerialPortManager == null){
+            mSerialPortManager = new SerialPortManager();
+        }
 
         mSerialPortManager.setOnSerialPortDataListener(new OnSerialPortDataListener() {
             @Override

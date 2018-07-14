@@ -23,13 +23,6 @@ public class BootReceiver extends BroadcastReceiver {
 
         context.startService(startGpioService);
 
-        Intent startLedService = new Intent(context, LedService.class);
-
-        context.startService(startLedService);
-
-
     }
-
-
 
 }
